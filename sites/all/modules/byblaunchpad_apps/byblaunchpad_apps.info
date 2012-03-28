@@ -1,0 +1,9 @@
+name = BYB Launchpad Apps
+description = Access apps from BYB Launchpad apps server
+
+version = 7.x-1.0-alpha1
+core = 7.x
+
+dependencies[] = apps
+
+files[] = byblaunchpad_apps.module

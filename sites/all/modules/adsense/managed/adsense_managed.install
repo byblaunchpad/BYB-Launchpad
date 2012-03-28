@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ * Install file of the adsense_managed module
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function adsense_managed_uninstall() {
+  // Delete all the AdSense variables and then clear the variable cache.
+  db_query("DELETE FROM {variable} WHERE name LIKE 'adsense\_managed\_%'");
+  cache_clear_all('variables', 'cache');
+}

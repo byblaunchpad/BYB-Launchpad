@@ -1,0 +1,40 @@
+<?php
+
+  function simpleseo_schema() {    
+    db_query("SET sql_mode=''");
+    
+    $schema['simpleseo'] = array (
+      'description' => 'This is the table for storing metadata contents.',
+      'primary key' => array('id'),
+      'unique keys' => array('nid' => array('nid')),
+      'fields' => array (
+        'id' => array (
+          'description' => 'The id of the metadata record.',
+          'type' => 'serial',
+          'not null' => TRUE,
+        ),      
+        'nid' => array (
+          'description' => 'The node id of the metadata.',
+          'type' => 'int',
+          'not null' => TRUE,
+        ),          
+        'title' => array (
+          'description' => 'The metadata title.',
+          'type' => 'varchar',
+          'length' => 255,
+        ),
+        'description' => array (
+          'description' => 'The metadata description',
+          'type' => 'varchar',
+          'length' => 500,
+        ),
+        'keywords' => array (
+          'description' => 'The metadata keywords.',
+          'type' => 'varchar',
+          'length' => 500,          
+        )                  
+       )
+    ); 
+
+    return $schema;
+  }

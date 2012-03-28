@@ -1,0 +1,162 @@
+<?php
+/**
+ * @file
+ * Code for the Blogs feature.
+ */
+
+define('BLOGS_DEFAULT_ADGROUP', 'Ad Group A');
+
+include_once('byb_blogs.features.inc');
+
+  function byb_blogs_install() {
+    _byb_blogs_add_default_ad();	
+    _byb_blogs_enable_blog_blocks();        
+    _byb_blogs_add_sample_posts();
+  }
+	
+  function _byb_blogs_add_default_ad() {
+    $defaultAd = drupal_get_path('module', 'byb_blogs') . '/ads/top.png';
+	$savedAd = file_unmanaged_copy($defaultAd, 'public://bybads/images/');
+	  
+	if ($savedAd) {
+	  $query = "INSERT INTO {file_managed} (uid, filename, uri, filemime, filesize, status, timestamp, type)
+	            VALUES (:uid, :filename, :uri, :filemime, :filesize, :status, :timestamp, :type)";
+	  $args = array(':uid'=>1, ':filename'=>'top.png', ':uri'=>$savedAd,
+	          ':filemime'=>'image/png', ':filesize'=>13554, ':status'=>1, ':timestamp'=>time(), ':type'=>'image');
+	  $lastId = db_query($query, $args, array('return' => Database::RETURN_INSERT_ID));
+	            
+	  db_insert('file_usage')
+	  ->fields(array(
+	    'fid' => $lastId, 
+	    'module' => 'bybads',
+	    'type' => 'bybads_ads',
+	    'id' => 1,
+	    'count' => 1
+	  ))->execute();
+	      
+	  db_insert('bybads_ads')
+	  ->fields(array(
+	    'title' => 'Ad 1',
+	    'adgroup' => BLOGS_DEFAULT_ADGROUP,
+	    'type' => 0,
+	    'ad' => $lastId,
+	    'openwindow ' => 1,
+	    'status' => 1,       
+	  ))->execute();
+	  
+	  //refresh blocks list
+	  _block_rehash();      		  
+	}
+  }
+
+function _byb_blogs_enable_blog_blocks() {
+  _byb_blogs_enable_block(array(
+    'weight' => 1,
+    'region' => 'highlighted', 
+    'module' => 'bybads', 
+    'delta' => str_replace(' ', '_', BLOGS_DEFAULT_ADGROUP))
+  );
+
+  _byb_blogs_enable_block(array(
+    'weight' => 0,
+    'region' => 'sidebar_second', 
+    'module' => 'masquerade', 
+    'delta' => 'masquerade',)
+  );
+  
+  _byb_blogs_enable_block(array(
+    'weight' => 1,
+    'region' => 'sidebar_second', 
+    'module' => 'follow', 
+    'delta' => 'site',)
+  );  
+  
+  variable_set('follow_site_block_title', 2);
+  
+  _byb_blogs_enable_block(array(
+    'weight' => 2,
+    'region' => 'sidebar_second', 
+    'module' => 'addthis', 
+    'delta' => 'addthis',)
+  );  
+  
+  variable_set('addthis_display_in_teasers', 1);
+  variable_set('addthis_display_in_links', 1);
+  
+  _byb_blogs_enable_block(array(
+    'weight' => 3,
+    'region' => 'sidebar_second', 
+    'module' => 'node', 
+    'delta' => 'syndicate',)
+  );
+
+  _byb_blogs_enable_block(array(
+    'weight' => 4,
+    'region' => 'sidebar_second', 
+    'module' => 'views', 
+    'delta' => 'recent_posts-block',)
+  );  
+  
+  _byb_blogs_enable_block(array(
+    'weight' => 5,
+    'region' => 'sidebar_second', 
+    'module' => 'comment', 
+    'delta' => 'recent',)
+  );
+
+  _byb_blogs_enable_block(array(
+    'weight' => 6,
+    'region' => 'sidebar_second', 
+    'module' => 'adsense_managed', 
+    'delta' => 0,)
+  ); 
+
+  variable_set('adsense_basic_id', 'pub-6594671638471629');
+  variable_set('adsense_secret_adtest', 1);
+  variable_set('adsense_managed_ad_block_0', 'Adsense+160x600:160x600:4141335628:center');
+}  
+  
+function _byb_blogs_enable_block($blockInfo) {
+  db_update('block')
+  ->fields(array(
+    'status' => 1,
+    'region' => $blockInfo['region'],
+    'weight' => $blockInfo['weight'],	  
+  ))
+  ->condition('module', $blockInfo['module'])
+  ->condition('delta', $blockInfo['delta'])
+  ->execute();     	
+}
+
+function _byb_blogs_add_node($title, $body , $type = 'blog_post', $format = 'filtered_html') {
+  $node = new stdClass();
+  $node->type = $type;
+  node_object_prepare($node);    
+  $node->title = $title;
+  $node->language = LANGUAGE_NONE;
+  $node->uid = 1;   
+  $node->body[$node->language][0]['format']  = $format;
+  $node->body[$node->language][0]['value']   = $body;      
+  $node->created = time();
+  $node->status = 1;       
+  $node->path['language'] = 'und'; 
+  $node->path['pathauto'] = 1;
+  $node->path['alias'] = '';   
+  
+  node_save($node);      
+}
+
+function _byb_blogs_add_sample_posts() {
+  //don't remove this: it ensures that body is included when inserting a node
+  drupal_flush_all_caches();
+  
+  $samplesPath = drupal_get_path('module', 'byb_blogs') . '/samples';
+  
+  for ($i=1; $i<=3; $i++) {
+  	$fileContents = file_get_contents($samplesPath . '/post-' . $i . '.txt');
+  	if ($fileContents) {
+  	  list($title, $body) = explode(':::::', $fileContents);
+  	  _byb_blogs_add_node($title, $body);
+  	}
+  }	
+}

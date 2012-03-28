@@ -1,0 +1,29 @@
+<?php
+/**
+ * @file
+ * Code for the BybConfigs feature.
+ */
+
+include_once('bybconfigs.features.inc');
+
+function bybconfigs_install() {
+  bybconfigs_config_blocks();
+}
+
+function bybconfigs_config_blocks() {  
+  //disable navigation block
+  $bQuery = db_update('block'); 
+  $bQuery->fields(array('status' => 0, 'region' => -1));  
+  $bQuery->condition('module', 'system');
+  $bQuery->condition('delta', 'navigation');
+  $bQuery->condition('theme', 'omega');
+  $bQuery->execute();
+
+  //disable search block
+  $bQuery = db_update('block'); 
+  $bQuery->fields(array('status' => 0, 'region' => -1));  
+  $bQuery->condition('module', 'search');
+  $bQuery->condition('delta', 'form');
+  $bQuery->condition('theme', 'omega');
+  $bQuery->execute();    
+}

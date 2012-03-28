@@ -1,0 +1,5 @@
+; $Id: simpleseo.module,v 1.3.2.0 2011/04/20 8:31:00 ourwayoflife Exp $
+name = SimpleSEO
+description = This module provides ability to set basic page SEO parameters.
+core = 7.x
+version = "7.x-1.0"

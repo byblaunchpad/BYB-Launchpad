@@ -1,0 +1,670 @@
+<?php
+
+/**
+ * Implements hook_install().
+ *
+ * Perform actions to set up the site for this profile.
+ */
+function byblaunchpad_install() { 
+  _byblaunchpad_standard_config();
+  _byblaunchpad_configure_wysiwyg();
+  _byblaunchpad_set_theme_settings();
+  _byblaunchpad_configure_menu();  
+  _byblaunchpad_configure_system();  
+  //_byblaunchpad_disable_some_blocks();
+  //_byblaunchpad_enable_some_blocks()
+}
+
+function _byblaunchpad_standard_config() {
+  // Add text formats.
+  $filtered_html_format = array(
+    'format' => 'filtered_html',
+    'name' => 'Filtered HTML',
+    'weight' => 0,
+    'filters' => array(
+      // URL filter.
+      'filter_url' => array(
+        'weight' => 0,
+        'status' => 1,
+      ),
+      // HTML filter.
+      'filter_html' => array(
+        'weight' => 1,
+        'status' => 1,
+      ),
+      // Line break filter.
+      'filter_autop' => array(
+        'weight' => 2,
+        'status' => 1,
+      ),
+      // HTML corrector filter.
+      'filter_htmlcorrector' => array(
+        'weight' => 10,
+        'status' => 1,
+      ),
+    ),
+  );
+  $filtered_html_format = (object) $filtered_html_format;
+  filter_format_save($filtered_html_format);
+
+  $full_html_format = array(
+    'format' => 'full_html',
+    'name' => 'Full HTML',
+    'weight' => 1,
+    'filters' => array(
+      // URL filter.
+      'filter_url' => array(
+        'weight' => 0,
+        'status' => 1,
+      ),
+      // Line break filter.
+      'filter_autop' => array(
+        'weight' => 1,
+        'status' => 1,
+      ),
+      // HTML corrector filter.
+      'filter_htmlcorrector' => array(
+        'weight' => 10,
+        'status' => 1,
+      ),
+    ),
+  );
+  $full_html_format = (object) $full_html_format;
+  filter_format_save($full_html_format);
+  
+  //Set default theme;
+  _byblaunchpad_set_default_theme();
+
+  // Enable some standard blocks.
+  $default_theme = variable_get('theme_default', 'corolla');
+  $admin_theme = 'rubik';
+  $values = array(
+    array(
+      'module' => 'system',
+      'delta' => 'main',
+      'theme' => $default_theme,
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'content',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1,
+    ),
+    array(
+      'module' => 'system',
+      'delta' => 'main-menu',
+      'theme' => $default_theme,
+      'status' => 1,
+      'weight' => -1,
+      'region' => -1,
+      'pages' => '',
+      'title' => '',
+      'cache' => -1,
+    ),
+    array(
+      'module' => 'superfish',
+      'delta' => '1',
+      'theme' => $default_theme,
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'footer',
+      'pages' => '',    
+      'title' => '<none>',
+      'cache' => -1,
+    ),         
+    /*array(
+      'module' => 'search',
+      'delta' => 'form',
+      'theme' => $default_theme,
+      'status' => 1,
+      'weight' => -1,
+      'region' => 'sidebar_first',
+      'pages' => '',
+      'cache' => -1,
+    ),   
+    array(
+      'module' => 'user',
+      'delta' => 'login',
+      'theme' => $default_theme,
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'sidebar_first',
+      'pages' => '',
+      'cache' => -1,
+    ),
+    array(
+      'module' => 'system',
+      'delta' => 'navigation',
+      'theme' => $default_theme,
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'sidebar_first',
+      'pages' => '',
+      'cache' => -1,
+    ),
+    array(
+      'module' => 'system',
+      'delta' => 'powered-by',
+      'theme' => $default_theme,
+      'status' => 1,
+      'weight' => 10,
+      'region' => 'footer',
+      'pages' => '',
+      'cache' => -1,
+    ),
+    array(
+      'module' => 'system',
+      'delta' => 'help',
+      'theme' => $default_theme,
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'help',
+      'pages' => '',
+      'cache' => -1,
+    ),*/
+    array(
+      'module' => 'node',
+      'delta' => 'recent',
+      'theme' => $admin_theme,
+      'status' => 1,
+      'weight' => 10,
+      'region' => 'dashboard_main',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1,
+    ),    
+    array(
+      'module' => 'system',
+      'delta' => 'main',
+      'theme' => $admin_theme,
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'content',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1,
+    ),
+    array(
+      'module' => 'system',
+      'delta' => 'help',
+      'theme' => $admin_theme,
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'help',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1,
+    ),
+    array(
+      'module' => 'user',
+      'delta' => 'login',
+      'theme' => $admin_theme,
+      'status' => 1,
+      'weight' => 10,
+      'region' => 'content',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1,
+    ),
+    array(
+      'module' => 'user',
+      'delta' => 'new',
+      'theme' => $admin_theme,
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'dashboard_sidebar',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1,
+    ),
+    array(
+      'module' => 'search',
+      'delta' => 'form',
+      'theme' => $admin_theme,
+      'status' => 1,
+      'weight' => -10,
+      'region' => 'dashboard_sidebar',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1,
+    ),   
+  );
+  $query = db_insert('block')->fields(array('module', 'delta', 'theme', 'status', 'weight', 'region', 'pages', 'title', 'cache'));
+  foreach ($values as $record) {
+    $query->values($record);
+  }
+  $query->execute();
+
+  // Insert default pre-defined node types into the database. For a complete
+  // list of available node type attributes, refer to the node type API
+  // documentation at: http://api.drupal.org/api/HEAD/function/hook_node_info.
+  $types = array(
+    array(
+      'type' => 'page',
+      'name' => st('Basic page'),
+      'base' => 'node_content',
+      'description' => st("Use <em>basic pages</em> for your static content, such as an 'About us' page."),
+      'custom' => 1,
+      'modified' => 1,
+      'locked' => 0,
+    ),
+    array(
+      'type' => 'article',
+      'name' => st('Article'),
+      'base' => 'node_content',
+      'description' => st('Use <em>articles</em> for time-sensitive content like news, press releases or blog posts.'),
+      'custom' => 1,
+      'modified' => 1,
+      'locked' => 0,
+    ),
+  );
+
+  foreach ($types as $type) {
+    $type = node_type_set_defaults($type);
+    node_type_save($type);
+    node_add_body_field($type);
+  }
+
+  // Insert default pre-defined RDF mapping into the database.
+  $rdf_mappings = array(
+    array(
+      'type' => 'node',
+      'bundle' => 'page',
+      'mapping' => array(
+        'rdftype' => array('foaf:Document'),
+      ),
+    ),
+    array(
+      'type' => 'node',
+      'bundle' => 'article',
+      'mapping' => array(
+        'field_image' => array(
+          'predicates' => array('og:image', 'rdfs:seeAlso'),
+          'type' => 'rel',
+        ),
+        'field_tags' => array(
+          'predicates' => array('dc:subject'),
+          'type' => 'rel',
+        ),
+      ),
+    ),
+  );
+  foreach ($rdf_mappings as $rdf_mapping) {
+    rdf_mapping_save($rdf_mapping);
+  }
+
+  // Default "Basic page" to not be promoted and have comments disabled.
+  variable_set('node_options_page', array('status'));
+  variable_set('comment_page', COMMENT_NODE_HIDDEN);
+
+  // Don't display date and author information for "Basic page" nodes by default.
+  variable_set('node_submitted_page', FALSE);
+
+  // Enable user picture support and set the default to a square thumbnail option.
+  variable_set('user_pictures', '1');
+  variable_set('user_picture_dimensions', '1024x1024');
+  variable_set('user_picture_file_size', '800');
+  variable_set('user_picture_style', 'thumbnail');
+
+  // Allow visitor account creation with administrative approval.
+  variable_set('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
+
+  // Create a default vocabulary named "Tags", enabled for the 'article' content type.
+  $description = st('Use tags to group articles on similar topics into categories.');
+  $help = st('Enter a comma-separated list of words to describe your content.');
+  $vocabulary = (object) array(
+    'name' => st('Tags'),
+    'description' => $description,
+    'machine_name' => 'tags',
+    'help' => $help,
+
+  );
+  taxonomy_vocabulary_save($vocabulary);
+
+  $field = array(
+    'field_name' => 'field_' . $vocabulary->machine_name,
+    'type' => 'taxonomy_term_reference',
+    // Set cardinality to unlimited for tagging.
+    'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+    'settings' => array(
+      'allowed_values' => array(
+        array(
+          'vocabulary' => $vocabulary->machine_name,
+          'parent' => 0,
+        ),
+      ),
+    ),
+  );
+  field_create_field($field);
+
+  $instance = array(
+    'field_name' => 'field_' . $vocabulary->machine_name,
+    'entity_type' => 'node',
+    'label' => 'Tags',
+    'bundle' => 'article',
+    'description' => $vocabulary->help,
+    'widget' => array(
+      'type' => 'taxonomy_autocomplete',
+      'weight' => -4,
+    ),
+    'display' => array(
+      'default' => array(
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 10,
+      ),
+      'teaser' => array(
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 10,
+      ),
+    ),
+  );
+  field_create_instance($instance);
+
+
+  // Create an image field named "Image", enabled for the 'article' content type.
+  // Many of the following values will be defaulted, they're included here as an illustrative examples.
+  // See http://api.drupal.org/api/function/field_create_field/7
+
+  $field = array(
+    'field_name' => 'field_image',
+    'type' => 'image',
+    'cardinality' => 1,
+    'locked' => FALSE,
+    'indexes' => array('fid' => array('fid')),
+    'settings' => array(
+      'uri_scheme' => 'public',
+      'default_image' => FALSE,
+    ),
+    'storage' => array(
+      'type' => 'field_sql_storage',
+      'settings' => array(),
+    ),
+  );
+  field_create_field($field);
+
+
+  // Many of the following values will be defaulted, they're included here as an illustrative examples.
+  // See http://api.drupal.org/api/function/field_create_instance/7
+  $instance = array(
+    'field_name' => 'field_image',
+    'entity_type' => 'node',
+    'label' => 'Image',
+    'bundle' => 'article',
+    'description' => st('Upload an image to go with this article.'),
+    'required' => FALSE,
+
+    'settings' => array(
+      'file_directory' => 'field/image',
+      'file_extensions' => 'png gif jpg jpeg',
+      'max_filesize' => '',
+      'max_resolution' => '',
+      'min_resolution' => '',
+      'alt_field' => TRUE,
+      'title_field' => '',
+    ),
+
+    'widget' => array(
+      'type' => 'image_image',
+      'settings' => array(
+        'progress_indicator' => 'throbber',
+        'preview_image_style' => 'thumbnail',
+      ),
+      'weight' => -1,
+    ),
+
+    'display' => array(
+      'default' => array(
+        'label' => 'hidden',
+        'type' => 'image',
+        'settings' => array('image_style' => 'large', 'image_link' => ''),
+        'weight' => -1,
+      ),
+      'teaser' => array(
+        'label' => 'hidden',
+        'type' => 'image',
+        'settings' => array('image_style' => 'medium', 'image_link' => 'content'),
+        'weight' => -1,
+      ),
+    ),
+  );
+  field_create_instance($instance);
+
+  // Enable default permissions for system roles.
+  $filtered_html_permission = filter_permission_name($filtered_html_format);
+  user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array('access content', 'access comments', $filtered_html_permission));
+  user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array('access content', 'access comments', 'post comments', 'skip comment approval', $filtered_html_permission));
+
+  // Create a default role for site administrators, with all available permissions assigned.
+  $admin_role = new stdClass();
+  $admin_role->name = 'administrator';
+  $admin_role->weight = 2;
+  user_role_save($admin_role);
+  user_role_grant_permissions($admin_role->rid, array_keys(module_invoke_all('permission')));
+  // Set this as the administrator role.
+  variable_set('user_admin_role', $admin_role->rid);
+
+  // Assign user 1 the "administrator" role.
+  db_insert('users_roles')
+    ->fields(array('uid' => 1, 'rid' => $admin_role->rid))
+    ->execute();
+
+  // Create a Home link in the main menu.
+  $item = array(
+    'link_title' => st('Home'),
+    'link_path' => '<front>',
+    'menu_name' => 'main-menu',
+  );
+  menu_link_save($item);
+
+  // Update the menu router information.
+  menu_rebuild();
+
+  // Enable the admin theme.
+  /*db_update('system')
+    ->fields(array('status' => 1))
+    ->condition('type', 'theme')
+    ->condition('name', 'seven')
+    ->execute();*/
+  //variable_set('admin_theme', 'seven');
+  variable_set('node_admin_theme', '1');
+}
+
+function _byblaunchpad_configure_wysiwyg() { 
+  //make full html filter the default / displaying the  wysiwyg editor
+  /*$fQuery = db_update('filter_format'); 
+  $fQuery->fields(array('weight' => -10));  
+  $fQuery->condition('format', 'full_html');
+  $fQuery->execute();*/
+  
+  //wysiwyg settings for full_html format
+  $wysiwygSettings = array(
+    'default' => 1,
+    'user_choose' => 0,
+    'show_toggle' => 1,
+    'theme' => 'advanced',
+    'language' => 'en',
+    'buttons' => array(
+      'default' => array('Bold' => 1, 'Italic' => 1, 'Underline' => 1, 'Strike' => 1, 'JustifyLeft' => 1,
+        'JustifyCenter' => 1, 'JustifyRight' => 1, 'JustifyBlock' => 1, 'BulletedList' => 1, 'NumberedList' => 1,
+        'Outdent' => 1, 'Indent' => 1, 'Undo' => 1, 'Redo' => 1, 'Link' => 1, 'Unlink' => 1,' Anchor' => 1,
+        'Image' => 1, 'TextColor' => 1, 'BGColor' => 1,' Superscript' => 1, 'Subscript' => 1, 'Blockquote' => 1,
+        'Source' => 1, 'HorizontalRule' => 1, 'Cut' => 1, 'Copy' => 1, 'Paste' => 1, 'PasteText' => 1,
+        'PasteFromWord' => 1, 'ShowBlocks' => 1, 'RemoveFormat' => 1, 'SpecialChar' => 1, 'Format' => 1,
+        'Font' => 1, 'FontSize' => 1, 'Styles' => 1, 'Table' => 1, 'SelectAll' => 1, 'Find' => 1, 'Replace' => 1,
+        'Flash' => 1, 'Smiley' => 1, 'CreateDiv' => 1, 'Maximize' => 1, 'SpellChecker' => 1, 'Scayt' => 1,
+        'About' => 1, 'Anchor' => 1, 'Superscript' => 1, 'Iframe' => 1),
+      'drupal' => array('break' => 1, 'video' => 1),
+      'imce' => array('imce' => 1)),
+    'toolbar_loc' => 'top',
+    'toolbar_align' => 'left',
+    'path_loc' => 'bottom',
+    'resizing' => 1,
+    'verify_html' => 1,
+    'preformatted' => 0,
+    'convert_fonts_to_spans' => 1,
+    'remove_linebreaks' => 1,
+    'apply_source_formatting' => 0,
+    'paste_auto_cleanup_on_paste' => 0,
+    'block_formats' => 'p,address,pre,h2,h3,h4,h5,h6,div',
+    'css_setting' => 'theme',
+    'css_path' => '', 
+    'css_classes' => ''
+  );  
+  
+  //add wysiwyg setting for full_html
+  $wysiwyg = db_insert('wysiwyg');
+  $wysiwyg->fields(array('format' => 'full_html', 'editor' => 'ckeditor', 'settings' => serialize($wysiwygSettings)));
+  $wysiwyg->execute();   
+  
+  //add wysiwyg setting for filterd_html
+  $wysiwyg = db_insert('wysiwyg');
+  $wysiwyg->fields(array('format' => 'filtered_html', 'editor' => 'ckeditor', 'settings' => serialize($wysiwygSettings)));
+  $wysiwyg->execute();    
+  
+  //add wysiwyg setting for plain_text
+  $wysiwyg = db_insert('wysiwyg');
+  $wysiwyg->fields(array('format' => 'plain_text'));
+  $wysiwyg->execute();
+}
+function _byblaunchpad_set_default_theme() {
+  // but not placed into variables.
+  $enable = array(
+    'theme_default' => 'corolla',
+    'admin_theme' => 'rubik',
+  );
+  theme_enable($enable);
+   
+  foreach ($enable as $var => $theme) {
+    if (!is_numeric($var)) {
+      variable_set($var, $theme);
+    }
+  }
+   
+  // Disable the default Bartik theme
+  theme_disable(array('bartik'));  
+}
+
+function _byblaunchpad_disable_block($delta, $theme = 'corolla') {
+  db_update('block')->fields(array('region' => '-1'))
+    ->condition('delta', $delta)
+    ->condition('theme', $theme)
+    ->execute();  
+}
+
+function _byblaunchpad_enable_block($delta, $region, $theme = 'corolla') {
+  db_update('block')->fields(array(
+    'region' => $region,
+    'status' => 1,
+  ))
+  ->condition('delta', $delta)
+  ->condition('theme', $theme)
+  ->execute();  	
+}
+
+function _byblaunchpad_enable_some_blocks() {
+  _byblaunchpad_enable_block('main-menu', 'menu_bar');
+}
+
+function _byblaunchpad_disable_some_blocks() {
+  _byblaunchpad_disable_block('powered-by');
+  _byblaunchpad_disable_block('login');
+  _byblaunchpad_disable_block('form');
+  _byblaunchpad_disable_block('navigation');
+}
+
+function _byblaunchpad_add_node($title, $body, $linkWeight, $type = 'page', $format = 'plain_text') {
+  $node = new stdClass();
+  $node->type = $type;
+  node_object_prepare($node);    
+  $node->title = $title;
+  $node->language = LANGUAGE_NONE;
+  $node->uid = 1;   
+  $node->body[$node->language][0]['format']  = $format;
+  $node->body[$node->language][0]['value']   = $body;      
+  $node->created = time();
+  $node->status = 1;       
+  $node->path['language'] = 'und'; 
+  $node->path['pathauto'] = 1;
+  $node->path['alias'] = '';   
+  $node->menu = array('enabled' => 1, 'mlid' => 0, 'module' => 'menu', 'hidden' => 0, 'has_children' => 0,
+    'customized' => 0, 'options' => array(), 'expanded' => 0, 'parent_depth_limit' => 8, 'link_title' => $title,
+    'description' => '', 'parent' => 'main-menu:0', 'weight' => $linkWeight, 'plid' => 0, 'menu_name' => 'main-menu'
+  );
+  
+  node_save($node);      
+}
+
+function _byblaunchpad_set_theme_settings() {
+  $themeSettings = array(
+    'toggle_logo' => 0,
+    'toggle_name' => 1,
+    'toggle_slogan' => 0,
+    'toggle_node_user_picture' => 1,
+    'toggle_comment_user_picture' => 1,
+    'toggle_comment_user_verification' => 1,
+    'toggle_favicon' => 1,
+    'toggle_main_menu' => 1,
+    'toggle_secondary_menu' => 0,
+    'default_logo' => 1,
+    'logo_path' => '',
+    'logo_upload' => '',
+    'default_favicon' => 1,
+    'favicon_path' => '',
+    'favicon_upload' => '',
+  );
+    
+  variable_set('theme_settings', $themeSettings);
+}
+
+function _byblaunchpad_configure_system() {  	
+  variable_set('error_level', ERROR_REPORTING_HIDE);
+}
+
+function _byblaunchpad_configure_menu() {
+  $delta = 1;
+  variable_set('superfish_name_' . $delta, 'Superfish Footer Menu');
+  variable_set('superfish_menu_' . $delta, 'main-menu:0');
+  variable_set('superfish_depth_' . $delta, '-1');
+  variable_set('superfish_type_' . $delta, 'navbar');
+  variable_set('superfish_style_' . $delta, 'none');
+  variable_set('superfish_speed_' . $delta, 'fast');
+  variable_set('superfish_delay_' . $delta, '800');
+  variable_set('superfish_pathclass_' . $delta, 'active-trail');
+  variable_set('superfish_pathlevels_' . $delta, '1');
+  variable_set('superfish_slide_' . $delta, 'none');
+  variable_set('superfish_arrow_' . $delta, '0');
+  variable_set('superfish_shadow_' . $delta, '1');
+  variable_set('superfish_bgf_' . $delta, '0');
+  variable_set('superfish_spp_' . $delta, '0');
+  variable_set('superfish_hid_' . $delta, '1');
+  variable_set('superfish_touch_' . $delta, '1');
+  variable_set('superfish_touchua_' . $delta, '0');
+  variable_set('superfish_touchual_' . $delta, '');
+  variable_set('superfish_supersubs_' . $delta, '1');
+  variable_set('superfish_minwidth_' . $delta, '12');
+  variable_set('superfish_maxwidth_' . $delta, '27');
+  variable_set('superfish_multicolumn_' . $delta, '0');
+  variable_set('superfish_mcexclude_' . $delta, '');
+  variable_set('superfish_mcdepth_' . $delta, '1');
+  variable_set('superfish_mclevels_' . $delta, '1');
+  variable_set('superfish_firstlast_' . $delta, '1');
+  variable_set('superfish_zebra_' . $delta, '1');
+  variable_set('superfish_dfirstlast_' . $delta, '0');
+  variable_set('superfish_dzebra_' . $delta, '0');
+  variable_set('superfish_itemcount_' . $delta, '1');
+  variable_set('superfish_itemcounter_' . $delta, '1');
+  variable_set('superfish_itemdepth_' . $delta, '1');
+  variable_set('superfish_hldescription_' . $delta, '0');
+  variable_set('superfish_hldmenus_' . $delta, '');
+  variable_set('superfish_hldexclude_' . $delta, '');
+  variable_set('superfish_wrapmul_' . $delta, '');
+  variable_set('superfish_wrapul_' . $delta, '');
+  variable_set('superfish_wraphl_' . $delta, '');
+  variable_set('superfish_wraphlt_' . $delta, ',&nbsp;&nbsp;&nbsp;');
+  variable_set('superfish_ulclass_' . $delta, '');
+  variable_set('superfish_liclass_' . $delta, '');
+  variable_set('superfish_hlclass_' . $delta, '');
+  variable_set('superfish_pathcss_' . $delta, '');
+  variable_set('superfish_expanded_' . $delta, '');
+  return;  	
+}

@@ -1,0 +1,85 @@
+name = BYB Launchpad
+description = Install platform for mobile compatible websites.
+version = VERSION
+core = 7.x
+
+;Core modules
+dependencies[] = block
+dependencies[] = color
+dependencies[] = comment
+dependencies[] = contextual
+dependencies[] = dashboard
+dependencies[] = help
+dependencies[] = image
+dependencies[] = list
+dependencies[] = menu
+dependencies[] = number
+dependencies[] = options
+dependencies[] = path
+dependencies[] = taxonomy
+dependencies[] = dblog
+dependencies[] = search
+dependencies[] = shortcut
+dependencies[] = toolbar
+dependencies[] = overlay
+dependencies[] = field_ui
+dependencies[] = file
+dependencies[] = rdf
+dependencies[] = system
+dependencies[] = book
+dependencies[] = filter
+dependencies[] = node
+dependencies[] = field
+dependencies[] = text
+dependencies[] = openid
+dependencies[] = contact
+dependencies[] = field_sql_storage
+
+
+;Contrib modules
+dependencies[] = admin_menu
+dependencies[] = save_draft
+dependencies[] = simplified_menu_admin
+dependencies[] = pathauto
+dependencies[] = googleanalytics
+dependencies[] = seochecklist
+dependencies[] = backup_migrate
+dependencies[] = backup_migrate_files
+dependencies[] = wysiwyg
+dependencies[] = panels
+dependencies[] = extlink
+dependencies[] = file_entity
+dependencies[] = imce
+dependencies[] = jplayer
+dependencies[] = video
+dependencies[] = video_ui
+dependencies[] = video_presets
+dependencies[] = videojs
+dependencies[] = site_verify
+dependencies[] = views
+dependencies[] = ctools
+dependencies[] = libraries
+dependencies[] = addthis
+dependencies[] = imce_mkdir
+dependencies[] = imce_wysiwyg
+dependencies[] = amazon_s3
+dependencies[] = follow
+dependencies[] = dialog
+dependencies[] = masquerade
+dependencies[] = filter_tips_dialog
+dependencies[] = features
+dependencies[] = strongarm
+dependencies[] = bybconfigs
+dependencies[] = apps
+dependencies[] = byblaunchpad_apps
+dependencies[] = superfish
+;dependencies[] = media 
+;dependencies[] = media_browser_plus
+
+files[] = byblaunchpad.profile
+
+; Information added by drupal.org packaging script on 2011-08-31
+version = "7.8"
+project = "drupal"
+datestamp = "1316162033"
+
